@@ -1,3 +1,126 @@
+## PayRwa — Fast & Secure Online Payments
+
+A practical and secure web application that enables users to register, login, and make mobile money payments using external APIs. Built with Node.js, MySQL, Docker, and HAProxy for scalable deployment.
+
+
+## Docker Image
+Docker Hub Repo: https://hub.docker.com/r/jonathan22liv/payrwa2
+
+Image Name: payrwa2
+Tags: latest, v1.0
+
+## Instructions
+To build the Docker image locally:
+   `docker build -t payrwa:latest .`
+
+## Run the web containers
+start containers with environment variables and port mapping:
+` 
+docker run -d \
+  --name web01 \
+  --env DB_HOST=mysql-db \
+  --env DB_USER=root \
+  --env DB_PASSWORD=yourpassword \
+  --env DB_NAME=payrwa \
+  --env APP_SECRET=your_secret_key \
+  -p 8081:8080 \
+  yourusername/payrwa:latest
+`
+Do the same for web02, changing the name and port (8082:8080).
+
+## HAProxy Load Balancer (on Lb01)
+HAProxy Configuration (/etc/haproxy/haproxy.cfg):
+`
+frontend http_front
+    bind *:80
+    default_backend web_back
+
+backend web_back
+    balance roundrobin
+    server web01 192.168.56.101:8080 check
+    server web02 192.168.56.102:8080 check
+`
+Reload HAPROXY:
+`
+sudo service haproxy restart
+sudo systemctl reload haproxy
+`
+
+## Testing Steps & Load Balancer Evidence
+Round-Robin Testing
+Open Postman or browser.
+
+Make 4 requests to http://<Lb01-IP>/status
+
+Check logs or responses:
+
+Response alternates between two containers (web01, web02)
+
+Alternatively log hostname in app.js using os.hostname() for container identification.
+
+## Hardening (Secrets Management)
+Avoid baking secrets like DB passwords or API keys into images.
+
+Use environment variables in docker run or docker-compose.yml.
+
+Alternatively:
+
+Use .env files and docker-compose.
+
+Use Docker secrets if using Docker Swarm.
+
+Never commit .env to GitHub. Use .gitignore.
+
+## Technologies Used
+Node.js + Express
+
+MySQL + MySQL2 (Promise-based)
+
+Docker + Docker Compose
+
+HAProxy for load balancing
+
+bcrypt for password hashing
+
+dotenv for config
+
+External MoMo (Mobile Money) API integration
+
+Session-based auth with express-session
+
+## External API Integration
+We integrate a Mobile Money API (MoMo) for simulating real payments.
+
+Credit: MTN MoMo Sandbox (https://momodeveloper.mtn.com)
+
+Used for payment processing simulation with real-time transaction tracking.
+Remittances API
+COLLECTION WIDGET API
+MOMO CONFIGURATION
+STIPE_SECRET_KEY
+EXCHANGE_API_KEY
+DATABASE CONFIGURATION
+
+##  Features
+ User Registration with email, phone, and currency
+
+ Secure Login and Session Tracking
+
+ Make Payments using MoMo
+
+ View Payment History (secured route)
+
+ Proper Error Handling on forms and APIs
+
+ Load-balanced across multiple containers
+
+##  Setup Locally (Without Docker)
+git clone https://github.com/yourusername/payrwa.git
+cd payrwa
+cp .env.example .env  # Fill with DB credentials and secrets
+npm install
+npm start
+----------------------------------------------------------------------------------------------------------
 # Web Infrastructure Lab
 
 This repository provides a lightweight environment to demonstrate web server setup and basic load balancing using Docker containers. The stack consists of two web servers (`web-01` and `web-02`) and a load balancer (`lb-01`) connected to a custom Docker network. Each service runs Ubuntu 24.04 with SSH enabled to allow you to install and configure additional software.
