@@ -9,7 +9,7 @@ networks:
 
 services:
   web-01:
-    build: ./web
+    build: ./backend
     container_name: web-01
     hostname: web-01
     networks:
@@ -17,10 +17,12 @@ services:
         ipv4_address: 172.20.0.11
     ports:
       - "2211:22"
-      - "8080:80"
+      - "8080:8080"
+    env_file:
+      - ./backend/.env
 
   web-02:
-    build: ./web
+    build: ./backend
     container_name: web-02
     hostname: web-02
     networks:
@@ -28,7 +30,9 @@ services:
         ipv4_address: 172.20.0.12
     ports:
       - "2212:22"
-      - "8081:80"
+      - "8081:8080"
+    env_file:
+      - ./backend/.env
 
   lb-01:
     build: ./lb
@@ -39,4 +43,4 @@ services:
         ipv4_address: 172.20.0.10
     ports:
       - "2210:22"
-      - "8082:80"
+      - "80:80"
