@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pay</title>
+  <link rel="stylesheet" href="/static/css/pay.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+<body>
+<header>
+  <nav class="navbar">
+    <div class="website-title"><div id="logo" class="logo-container"></div></div>
+    <div class="menu-btn"><i class="fas fa-bars"></i></div>
+    <ul class="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/login" id="loginLink">Login</a></li>
+      <li><a href="/register" id="registerLink">Register</a></li>
+      <li><a href="/pay">Payment</a></li>
+      <li><a href="/history">History</a></li>
+      <li><a href="/logout" id="logoutLink" style="display: none;">Logout</a></li>
+    </ul>
+    <div class="close-btn"><i class="fas fa-times"></i></div>
+  </nav>
+  <div class="overlay"></div>
+</header>
+
+<main>
+  <div class="center-container">
+    <h2>Make a Payment</h2>
+    <form id="paymentForm" class="form">
+      <div class="form-group">
+        <select id="payType" required>
+          <option value="">Select Payment Type</option>
+          <option value="momo_code">MoMo Code</option>
+          <option value="qr_data">QR Target</option>
+          <option value="phone_number">Phone Number</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <input type="text" id="target" placeholder="Enter Destination" required />
+      </div>
+      <div class="form-group">
+        <input type="number" id="amount" placeholder="Amount" required />
+      </div>
+      <div class="form-group">
+        <input type="text" id="currency" placeholder="Currency (e.g. RWF)" required />
+      </div>
+      <div class="form-group">
+        <input type="text" id="userPhone" placeholder="Your MTN Number" required />
+      </div>
+      <button type="submit">Proceed to Pay</button>
+    </form>
+    <div id="payResponse" aria-live="polite"></div>
+  </div>
+</main>
+
+<script src="/static/js/pay.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="/static/js/home.js"></script>
+</body>
+</html>

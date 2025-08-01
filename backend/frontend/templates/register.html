@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register</title>
+  <link rel="stylesheet" href="/static/css/register.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <meta name="csrf-token" content="">
+</head>
+<body>
+<header>
+  <nav class="navbar">
+    <div class="menu-btn" aria-label="Open menu">
+      <i class="fas fa-bars"></i>
+    </div>
+
+    <div class="website-title"><div id="logo" class="logo-container"></div></div>
+    <ul class="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/login">Login</a></li>
+      <li><a href="/register">Register</a></li>
+      <li><a href="/pay">Payment</a></li>
+      <li><a href="/history">History</a></li>
+    </ul>
+    <div class="overlay"></div>
+    <button class="close-btn" aria-label="Close menu">
+      <i class="fas fa-times"></i> Close
+    </button>
+
+  </nav>
+</header>
+<main>
+  <div class="center-container">
+    <h2>Create an Account</h2>
+    <form id="registerForm" class="form">
+      <div class="form-group">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required />
+      </div>
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required />
+      </div>
+      <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" minlength="8" required />
+      </div>
+      <div class="form-group">
+        <label for="currency">Preferred Currency:</label>
+        <input type="text" id="currency" name="currency" placeholder="e.g. USD or RWF" required />
+      </div>
+      <div class="form-group">
+        <label for="phone">Phone Number:</label>
+        <input type="tel" id="phone" name="phone" pattern="[0-9]{10}" placeholder="e.g. 0781234567" required />
+      </div>
+      <button type="submit">Register</button>
+    </form>
+    <div id="regResponse" aria-live="polite"></div>
+  </div>
+</main>
+<script src="/static/js/register.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="/static/js/home.js"></script>
+</body>
+</html>
