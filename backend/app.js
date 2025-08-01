@@ -1,3 +1,4 @@
+import bcrypt from 'bcrypt';
 import express from 'express';
 import session from 'express-session';
 import dotenv from 'dotenv';
@@ -7,7 +8,6 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 dotenv.config();
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -17,9 +17,9 @@ const app = express();
 let db;
 try {
   db = await mysql.createConnection({
-    host: process.env.DB_HOST,
+    host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER,
-    password: process.env.DB_PASS,
+    password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME
   });
   console.log("✅ Connected to MySQL");
@@ -27,6 +27,7 @@ try {
   console.error("❌ MySQL connection failed:", err);
   process.exit(1);
 }
+app.set('db', db);
 
 // Middleware
 app.use(cors());
@@ -41,34 +42,27 @@ app.use(session({
 // Static
 app.use('/static', express.static(path.join(__dirname, 'frontend', 'static')));
 
-// HTML routes
+// Serve HTML
 const servePage = (file) => path.join(__dirname, 'frontend', 'templates', file);
 app.get('/', (req, res) => res.sendFile(servePage('index.html')));
 app.get('/register', (req, res) => res.sendFile(servePage('register.html')));
 app.get('/login', (req, res) => res.sendFile(servePage('login.html')));
 app.get('/pay', (req, res) => res.sendFile(servePage('pay.html')));
 app.get('/history', async (req, res) => {
-  if (req.headers.accept?.includes('application/json')) {
-    if (!req.session.user) {
-      return res.status(403).json({ success: false, error: 'Login required' });
-    }
+  if (!req.session.user) return res.status(403).json({ success: false, error: 'Login required' });
 
-    try {
-      const [rows] = await db.execute(
-        'SELECT * FROM transactions WHERE user_id = ? ORDER BY date DESC',
-        [req.session.user.id]
-      );
-      return res.json({ success: true, transactions: rows });
-    } catch (err) {
-      console.error(err);
-      return res.status(500).json({ success: false, error: 'History error' });
-    }
-  } else {
-    res.sendFile(servePage('history.html'));
+  try {
+    const [rows] = await db.execute(
+      'SELECT * FROM transactions WHERE user_id = ? ORDER BY date DESC',
+      [req.session.user.id]
+    );
+    res.json({ success: true, transactions: rows });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'History error' });
   }
 });
 
-// Register route
+// Register
 app.post('/register', async (req, res) => {
   const { username, email, password, currency, phone } = req.body;
   if (!username || !email || !password || !currency || !phone) {
@@ -83,14 +77,14 @@ app.post('/register', async (req, res) => {
       return res.status(409).json({ success: false, error: 'Username or email already exists.' });
     }
 
+    const hashed = await bcrypt.hash(password, 10);
     await db.execute(
       'INSERT INTO users (username, email, password, currency, phone) VALUES (?, ?, ?, ?, ?)',
-      [username, email, password, currency, phone]
+      [username, email, hashed, currency, phone]
     );
 
     res.json({ success: true, message: 'User registered' });
   } catch (err) {
-    console.error(err);
     res.status(500).json({ success: false, error: 'Database error' });
   }
 });
@@ -103,21 +97,18 @@ app.post('/login', async (req, res) => {
   }
 
   try {
-    const [rows] = await db.execute(
-      'SELECT * FROM users WHERE username = ? AND password = ?', [username, password]
-    );
-    if (rows.length === 0) {
+    const [rows] = await db.execute('SELECT * FROM users WHERE username = ?', [username]);
+    const user = rows[0];
+    if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ success: false, error: 'Invalid credentials' });
     }
 
-    const user = rows[0];
     req.session.user = { id: user.id, username: user.username };
     await db.execute('UPDATE users SET last_login = NOW() WHERE id = ?', [user.id]);
 
     res.json({ success: true });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, error: 'Database error' });
+    res.status(500).json({ success: false, error: 'Login failed' });
   }
 });
 
@@ -135,14 +126,14 @@ app.get('/status', (req, res) => {
   }
 });
 
-// Payment
+// Pay
 app.post('/pay', async (req, res) => {
   if (!req.session.user) {
     return res.status(403).json({ success: false, error: 'Login required' });
   }
 
-  const { paymentType, paidTo, amount, phone, currency } = req.body;
-  if (!paymentType || !paidTo || !amount || !phone || !currency) {
+  const { payType, target, amount, userPhone, currency } = req.body;
+  if (!payType || !target || !amount || !userPhone || !currency) {
     return res.status(400).json({ success: false, error: 'All fields are required' });
   }
 
@@ -152,22 +143,21 @@ app.post('/pay', async (req, res) => {
       [
         req.session.user.id,
         amount,
-        paidTo,
+        target,
         'pending',
-        `${paymentType} from ${phone}`,
+        `${payType} from ${userPhone}`,
         currency
       ]
     );
 
     res.json({ success: true, message: 'Payment created' });
   } catch (err) {
-    console.error(err);
     res.status(500).json({ success: false, error: 'Payment error' });
   }
 });
 
-// Start server
+// Start
 const PORT = process.env.PORT || 8080;
-app.listen(process.env.PORT || 8080, '0.0.0.0', () => {
-  console.log(`✅ Server running on port${process.env.PORT || 8080}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`✅ Server running on port ${PORT}`);
 });

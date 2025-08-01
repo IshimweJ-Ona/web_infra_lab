@@ -1,4 +1,4 @@
-version: "3.9"
+version: "3.8"
 
 networks:
   lablan:
@@ -8,16 +8,34 @@ networks:
         - subnet: 172.20.0.0/24
 
 services:
+
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: payrwa1
+      MYSQL_USER: user
+      MYSQL_PASSWORD: userpass
+    ports:
+      - "3307:3306" 
+    networks:
+      lablan:
+        ipv4_address: 172.20.0.5
+
   web-01:
     build: ./backend
     container_name: web-01
     hostname: web-01
+    depends_on:
+      - mysql-db
     networks:
       lablan:
         ipv4_address: 172.20.0.11
     ports:
       - "2211:22"
-      - "8080:8080"
+      - "3000:8080"
     env_file:
       - ./backend/.env
 
@@ -25,12 +43,14 @@ services:
     build: ./backend
     container_name: web-02
     hostname: web-02
+    depends_on:
+      - mysql-db
     networks:
       lablan:
         ipv4_address: 172.20.0.12
     ports:
       - "2212:22"
-      - "8081:8080"
+      - "3001:8080"
     env_file:
       - ./backend/.env
 
@@ -43,4 +63,4 @@ services:
         ipv4_address: 172.20.0.10
     ports:
       - "2210:22"
-      - "80:80"
+      - "8080:80"

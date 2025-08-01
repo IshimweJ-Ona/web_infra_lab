@@ -1,20 +1,32 @@
-import { addTransaction } from '../services/paymentService.js';
-import { initiateMomoTransaction } from '../services/momoService.js';
+import { db } from '../models/User.js';
 
 export const pay = async (req, res) => {
-  const { amount, currency, phone, description } = req.body;
+  if (!req.session.user) {
+    return res.status(403).json({ success: false, error: 'Login required' });
+  }
+
+  const { payType, target, amount, userPhone, currency } = req.body;
+
+  if (!payType || !target || !amount || !userPhone || !currency) {
+    return res.status(400).json({ success: false, error: 'All fields are required' });
+  }
 
   try {
-    const momoResponse = await initiateMomoTransaction({ amount, currency, phone });
-    const tx = await addTransaction(req.user.id, amount, description, currency);
+    await db.execute(
+      'INSERT INTO transactions (user_id, amount, paid_to, date, status, description, currency) VALUES (?, ?, ?, NOW(), ?, ?, ?)',
+      [
+        req.session.user.id,
+        amount,
+        target,
+        'pending',
+        `${payType} from ${userPhone}`,
+        currency
+      ]
+    );
 
-    res.json({
-      success: true,
-      transactionId: tx.transactionId,
-      momo: momoResponse
-    });
+    res.json({ success: true, message: 'Payment created' });
   } catch (err) {
     console.error('Payment error:', err.message);
-    res.status(500).json({ error: 'Payment failed' });
+    res.status(500).json({ success: false, error: 'Payment failed' });
   }
 };
