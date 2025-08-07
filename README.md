@@ -123,11 +123,14 @@ npm start
 
 ## Change ports
 If you are usinng xampp as start for database then you will need to change either the dockercontainers port or for xampp
-In my case for futur use of xampp I preferd to change the ports of my dockercontainers. 
+In my case for futur use of xampp I preferd to change the ports of my dockercontainers.
+Where I did change the ports is in compose.yml file to the ports section. The reaso to change ports is that servers listen to a different port from mysql database if it the same it will crash and the database will make that everything doesn't respond.  
 
 ## Demo video link
 Youtube: 
 `https://www.youtube.com/watch?v=G3RgZHtufmQ&t=37s`
+
+############################################ For basic ##################################################
 ----------------------------------------------------------------------------------------------------------
 # Web Infrastructure Lab
 
