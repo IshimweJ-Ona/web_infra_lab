@@ -4,7 +4,7 @@ A practical and secure web application that enables users to register, login, an
 
 
 ## Docker Image
-Docker Hub Repo: https://hub.docker.com/r/jonathan22liv/payrwa2
+Docker Hub Repo: [https://hub.docker.com/r/jonathan22liv/payrwa2](https://hub.docker.com/repository/docker/jonathan22liv/payrwa/general)
 
 Image Name: payrwa2
 Tags: latest, v1.0
