@@ -120,6 +120,14 @@ cd payrwa
 cp .env.example .env  # Fill with DB credentials and secrets
 npm install
 npm start
+
+## Change ports
+If you are usinng xampp as start for database then you will need to change either the dockercontainers port or for xampp
+In my case for futur use of xampp I preferd to change the ports of my dockercontainers. 
+
+## Demo video link
+Youtube: 
+`https://www.youtube.com/watch?v=G3RgZHtufmQ&t=37s`
 ----------------------------------------------------------------------------------------------------------
 # Web Infrastructure Lab
 
